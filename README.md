@@ -31,7 +31,7 @@ The application follows a strict **Data Access Layer pattern** to ensure separat
 
 ---
 
-## 🚀 Deployment Instructions
+## Deployment Instructions
 
 Follow these steps to deploy QuizApp onto your local Kubernetes environment.
 
@@ -46,13 +46,13 @@ You must have the following software installed and configured:
 
 ### Step 2: Pull the images for the application microservices and the database:
 
-# QuizApp Web UI
+** QuizApp Web UI **
 docker pull lukicharms/quizappv1:latest
 
-# QuizWorker Data Access Layer
+** QuizWorker Data Access Layer **
 docker pull lukicharms/quizworkerv1:latest
 
-# MongoDB Database
+** MongoDB Database **
 docker pull mongo:6.0
 
 ### Step 3: Execute Deployment Script
