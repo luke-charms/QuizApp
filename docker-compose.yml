@@ -1,0 +1,47 @@
+version: "3.8"
+services:
+  # QuizApp - Frontend service
+  quizapp:
+    build: ./QuizApp
+    image: quizappv1
+    ports:
+      - 8080:3000
+    volumes:
+      - ./QuizApp/src:/app/src
+    environment:
+      WORKER_URL: http://quizworker:3001
+      DEBUG: 'quizapp:*'
+    depends_on:
+      - quizworker
+    restart: always
+
+  # QuizWorker - Data access layer
+  quizworker:
+    build: ./QuizWorker
+    image: quizworkerv1
+    volumes:
+      - ./QuizWorker/src:/app/src
+    deploy:
+      replicas: 2
+    environment:
+      MONGO_URL: mongodb://textstore:27017/quizdb
+      INTERVAL: 10000
+      DEBUG: 'quizworker:*'
+    depends_on:
+      - textstore
+    restart: always
+
+  # MongoDB - Database
+  textstore:
+    image: mongo:6.0
+    restart: always
+    command: --quiet --syslog
+    expose:
+      - "27017"
+    volumes:
+      - textstore-data:/data/db
+      - mongo-config:/data/configdb
+
+volumes:
+  textstore-data:
+  mongo-config:

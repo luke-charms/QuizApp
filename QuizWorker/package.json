@@ -1,0 +1,14 @@
+{
+  "name": "quizworker",
+  "version": "1.0.0",
+  "description": "Background worker for QuizApp backend",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.7",
+    "mongoose": "^6.3.3"
+  }
+}

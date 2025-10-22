@@ -1,0 +1,178 @@
+# QUIZ APPLICATION
+
+# Service: quizapp-service (type: LoadBalancer)
+apiVersion: v1
+kind: Service
+metadata:
+  name: quizapp-service
+  labels:
+    app: quizapp
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 3000
+    nodePort: 30001
+    protocol: TCP
+  selector:
+    app: quizapp
+---
+
+# Deployment: QuizApp
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quizapp-deployment
+  labels:
+    app: quizapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quizapp
+  template:
+    metadata:
+      labels:
+        app: quizapp
+    spec:
+      containers:
+      - name: quizapp
+        image: lukicharms/quizappv1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        - name: WORKER_URL
+          value: "http://quizworker-service:3001"
+        - name: DEBUG
+          value: "quizapp:*"
+---
+
+# Service: quizworker-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: quizworker-service
+  labels:
+    app: quizworker
+spec:
+  type: ClusterIP
+  selector:
+    app: quizworker
+  ports:
+  - name: api
+    port: 3001
+    targetPort: 3001
+    protocol: TCP
+---
+
+# Deployment: QuizWorker
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quizworker-deployment
+  labels:
+    app: quizworker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: quizworker
+  template:
+    metadata:
+      labels:
+        app: quizworker
+    spec:
+      # Tells the QuizWorker pod to wait for the mongoDB service to start before itself
+      initContainers:
+      - name: wait-for-mongo
+        image: busybox
+        command: ['sh', '-c', 'until nc -z textstore-service 27017; do echo "Waiting for MongoDB..."; sleep 5; done;']
+      containers:
+      - name: quizworker
+        image: lukicharms/quizworkerv1
+        env:
+        - name: MONGO_URL
+          value: "mongodb://textstore-service:27017/quizdb"
+        - name: INTERVAL
+          value: "10000"
+        - name: DEBUG
+          value: "quizworker:*"
+        ports:
+        - containerPort: 3001
+---
+
+# Service: textstore-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: textstore-service
+  labels:
+    app: textstore
+spec:
+  ports:
+  - port: 27017
+    targetPort: mongodb-port
+  clusterIP: None
+  selector:
+    app: textstore
+---
+
+# StatefulSet: textstore (MongoDB)
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: textstore
+  labels:
+    app: textstore
+spec:
+  serviceName: mongodb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: textstore
+  template:
+    metadata:
+      labels:
+        app: textstore
+    spec:
+      containers:
+      - name: textstore
+        image: mongo
+        ports:
+        - containerPort: 27017
+          name: mongodb-port
+        volumeMounts:
+        - name: textstore-data
+          mountPath: /data/db
+        - name: mongo-config
+          mountPath: /data/configdb
+  volumeClaimTemplates:
+  - metadata:
+      name: textstore-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Mi
+  - metadata:
+      name: mongo-config
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 5Mi
+---
+
+# ConfigMap: quizapp-config
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: quizapp-config
+  labels:
+    data: config
+data:
+  worker_url: "http://quizworker-service:3001"
+  mongo_url: "mongodb://textstore-service:27017/quizdb"
+  debug: "quizapp:*"
+---
