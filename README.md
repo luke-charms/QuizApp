@@ -1,14 +1,60 @@
-\subsection{Application Overview}
-QuizApp is an interactive quiz software deployed as a three-layer microservice architecture on Kubernetes. Users access a web interface to take multiple-choice quizzes, with questions kept in the MongoDB and accessed through a data access service called QuizWorker. 
-The application's architecture follows a Data Access Layer pattern where the user interface layer (QuizApp) has no direct database access and must communicate with the data access layer (QuizWorker) via REST API.
+# QuizApp
 
-\subsection{Core Functionality}
-\begin{itemize}
-    \item \textbf{Quiz Taking:} When a connection to the web UI (/) is made, the application displays a random question selected from the database, and the user is prompted to answer it through a multiple choice selection
-    \item \textbf{Question Management:} Users can add questions via a web form on a separate page (/addQuestion) or using the REST API
-    \item \textbf{Score Tracking:} User scores are persistent across browser sessions
-    \item \textbf{REST APIs:} Both microservices (QuizApp and QuizWorker) use APIs for integration and communiction between layers of the application
-\end{itemize}
+**QuizApp** is an interactive, multiple-choice quiz application deployed using a **three-layer microservice architecture** on **Kubernetes**. Users engage with a web interface to test their knowledge, with all questions managed via a REST API by a separate data access service.
 
-\subsection{Deployment Instructions}
-Run the deploy-quizapp.sh bash script to start deployment
+---
+
+## Architecture Overview
+
+The application follows a strict **Data Access Layer pattern** to ensure separation of concerns:
+
+| Layer | Microservice/Component | Role | Communication |
+| :--- | :--- | :--- | :--- |
+| **Presentation** | **QuizApp** (Web UI) | Handles user interaction and displays the quiz. | REST API (to QuizWorker) |
+| **Data Access** | **QuizWorker** | Manages question retrieval, addition, and score persistence. | REST API (to QuizApp) |
+| **Data Storage** | **MongoDB** | Stores all quiz questions and user score data. | Direct access (by QuizWorker only) |
+
+---
+
+## Core Functionality
+
+-   **Quiz Taking:**
+    -   Accessing the main web UI (`/`) displays a random question from the database.
+    -   Users are prompted to select an answer from the multiple-choice options.
+-   **Question Management:**
+    -   Questions can be added via a dedicated web form (`/addQuestion`).
+    -   Alternatively, new questions can be inserted directly using the QuizWorker's REST API.
+-   **Score Tracking:**
+    -   User scores are reliably **persistent** and maintained across different browser sessions.
+-   **REST APIs:**
+    -   Both the QuizApp and QuizWorker microservices expose and consume REST APIs for seamless integration and inter-layer communication.
+
+---
+
+## 🚀 Deployment Instructions
+
+Follow these steps to deploy QuizApp onto your local Kubernetes environment.
+
+### Prerequisites
+
+You must have the following software installed and configured:
+
+1.  **Docker Desktop** (Ensure **Kubernetes** is enabled in settings).
+2.  **kubectl** (Installation via Homebrew: `brew install kubectl`).
+
+### Step 1: Clone the Project
+
+### Step 2: Pull the images for the application microservices and the database:
+
+# QuizApp Web UI
+docker pull lukicharms/quizappv1:latest
+
+# QuizWorker Data Access Layer
+docker pull lukicharms/quizworkerv1:latest
+
+# MongoDB Database
+docker pull mongo:6.0
+
+### Step 3: Execute Deployment Script
+
+./deploy-quizapp.sh
