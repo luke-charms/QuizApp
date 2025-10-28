@@ -6,7 +6,7 @@ const WORKER_URL = process.env.WORKER_URL || 'http://quizworker-service:3001';
 
 // Home page - Render quiz UI
 router.get('/', async (req, res) => {
-  console.log('GET / request received');
+  console.log('User joined');
   try {
     // Fetch question from QuizWorker
     const response = await fetch(`${WORKER_URL}/api/question`);
@@ -56,6 +56,7 @@ router.get('/api/question', async (req, res) => {
 
 // Render form to add a question
 router.get('/addQuestion', (req, res) => {
+  console.log('User adding new question');
   res.render('addQuestion', { success: false, error: null });
 });
 
@@ -105,6 +106,8 @@ router.post('/addQuestion', async (req, res) => {
       error: null,
       questionId: result.id 
     });
+
+    console.log(`Added question: "${question}"`);
   } catch (err) {
     console.error('Error adding question:', err);
     

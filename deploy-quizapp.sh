@@ -7,31 +7,25 @@ RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Global Variables
-QUIZAPP_IMAGE="lukicharms/quizappv1"
-QUIZWORKER_IMAGE="lukicharms/quizworkerv1"
-QUIZAPP_DIR="./Quizapp"
-QUIZWORKER_DIR="./Quizworker"
-
 # Build QuizApp image
 echo -e "${BLUE}  Building QuizApp Docker image...${NC}"
-cd "$QUIZAPP_DIR"
-docker build -t "${QUIZAPP_IMAGE}:latest" .
+cd ./Quizapp
+docker build -t lukicharms/quizappv1:latest .
 cd ..
 
 # Build QuizWorker image
 echo -e "${BLUE}  Building QuizWorker Docker image...${NC}"
-cd "$QUIZWORKER_DIR"
-docker build -t "${QUIZWORKER_IMAGE}:latest" .
+cd ./Quizworker
+docker build -t lukicharms/quizworkerv1:latest .
 cd ..
 
 # Push QuizApp image
 echo -e "${BLUE}  Pushing QuizApp image to Docker Hub...${NC}"
-docker push "${QUIZAPP_IMAGE}:latest"
+docker push lukicharms/quizappv1:latest
 
 # Push QuizWorker image
 echo -e "${BLUE}  Pushing QuizWorker image to Docker Hub...${NC}"
-docker push "${QUIZWORKER_IMAGE}:latest"
+docker push lukicharms/quizworkerv1:latest
 
 # Apply Kubernetes configuration
 echo -e "${BLUE}  Applying Kubernetes configuration...${NC}"
