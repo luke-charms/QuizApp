@@ -1,5 +1,18 @@
 # QUIZ APPLICATION
 
+# ConfigMap: quizapp-config
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: quizapp-config
+  labels:
+    data: config
+data:
+  worker_url: "http://quizworker-service:3001"
+  mongo_url: "mongodb://textstore-service:27017/quizdb"
+  debug: "quizapp:*"
+---
+
 # Service: quizapp-service (type: LoadBalancer)
 apiVersion: v1
 kind: Service
@@ -162,17 +175,4 @@ spec:
       resources:
         requests:
           storage: 5Mi
----
-
-# ConfigMap: quizapp-config
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: quizapp-config
-  labels:
-    data: config
-data:
-  worker_url: "http://quizworker-service:3001"
-  mongo_url: "mongodb://textstore-service:27017/quizdb"
-  debug: "quizapp:*"
 ---
